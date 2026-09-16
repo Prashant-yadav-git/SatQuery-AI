@@ -554,33 +554,11 @@ The broader research objective is to investigate how multimodal foundation model
 
 ---
 
-## 🤝 Contributing
 
-Contributions are welcome.
 
-```bash
-git checkout -b feature/your-feature
-git commit -m "Add: your feature"
-git push origin feature/your-feature
-```
 
-Then open a Pull Request.
 
----
 
-## 📜 License
-
-Add the project's license here once the repository's licensing terms are finalized.
-
----
-
-## 👨‍💻 Team
-
-**SatQuery AI**
-
-Built for intelligent, accessible and multimodal remote-sensing analysis.
-
----
 
 <div align="center">
 
