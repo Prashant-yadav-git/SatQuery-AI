@@ -11,7 +11,11 @@ SatQuery AI is an AI-powered geospatial assistant that lets users **upload satel
 [![Status](https://img.shields.io/badge/Status-Research%20Prototype-orange)](#)
 
 ---
-
+## The Problem 
+There is no platform where a user can simply upload satellite images, ask a question in normal language, and get an intelligent, evidence-based answer
+Using these exsiting tools requires knowledge of sensors, GIS workflows, and model selection.. 
+General-purpose LLMs like Chatgpt ,gemini etc are mainly designed for 3-channel RGB images, so they struggle with multispectral and SAR satellite images as these are 4 to 13+ spectral bands.
+--
 ## 🌍 The Idea
 
 Remote-sensing imagery contains enormous amounts of information, but extracting it often requires knowledge of:
