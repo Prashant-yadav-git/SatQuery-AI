@@ -25,8 +25,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onToggle,
 }) => {
-  if (!isOpen) return null;
-
   const navItems: GooeyNavItem[] = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'new-chat', label: 'New Chat', icon: MessageSquarePlus },
@@ -54,11 +52,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   );
 
   return (
-    <aside
-      id="main-sidebar"
-      className="w-64 xl:w-72 h-[calc(100vh-2rem)] my-4 ml-4 rounded-[28px] glass-panel border border-white/60 shadow-2xl flex flex-col select-none z-30 shrink-0 overflow-hidden"
-    >
-      {/* Brand Header */}
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isOpen && (
+        <div
+          onClick={onToggle}
+          className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-30 lg:hidden transition-opacity"
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        id="main-sidebar"
+        className={`fixed lg:static top-0 left-0 z-40 lg:z-30 w-72 sm:w-76 lg:w-64 xl:w-72 h-[calc(100vh-1rem)] lg:h-[calc(100vh-2rem)] my-2 lg:my-4 ml-2 lg:ml-4 rounded-[24px] lg:rounded-[28px] glass-panel border border-white/80 shadow-2xl flex flex-col select-none shrink-0 overflow-hidden transition-all duration-300 ease-out ${
+          isOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : '-translate-x-[110%] lg:hidden opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Brand Header */}
       <div className="p-4 pb-2">
         <div className="flex items-center justify-between px-2 py-1 mb-2">
           <div className="flex items-center gap-3">
@@ -90,7 +100,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <GooeyNav
           items={navItems}
           activeIndex={activeIndex}
-          onSelect={(id) => onSelectTab(id)}
+          onSelect={(id) => {
+            onSelectTab(id);
+            if (window.innerWidth < 1024) {
+              onToggle();
+            }
+          }}
           particleCount={8}
           particleDistances={[22, 6]}
           particleR={35}
@@ -102,6 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       </div>
     </aside>
+    </>
   );
 };
 

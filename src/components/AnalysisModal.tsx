@@ -26,19 +26,19 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ item, onClose }) =
   if (!item) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200 select-none">
-      <div className="relative w-full max-w-5xl max-h-[92vh] flex flex-col glass-panel rounded-[28px] overflow-hidden border border-white/80 shadow-2xl bg-white/95">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200 select-none">
+      <div className="relative w-full max-w-5xl max-h-[95vh] sm:max-h-[92vh] flex flex-col glass-panel rounded-[22px] sm:rounded-[28px] overflow-hidden border border-white/80 shadow-2xl bg-white/95">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/70 bg-white/70">
-          <div className="flex items-center gap-3">
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900 text-white shadow-xs">
+        <div className="flex items-center justify-between px-3.5 sm:px-6 py-3 sm:py-4 border-b border-slate-200/70 bg-white/70 gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-slate-900 text-white shadow-xs shrink-0">
               {item.category}
             </span>
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-lg font-bold text-slate-900 leading-tight truncate">
                 {item.title}
               </h2>
-              <div className="flex items-center gap-3 text-xs text-slate-500 mt-0.5">
+              <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3 h-3 text-slate-400" />
                   {item.date}
@@ -52,17 +52,18 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ item, onClose }) =
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={() => alert(`Report for "${item.title}" exported as GeoTIFF mask and PDF.`)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Export GeoTIFF</span>
             </button>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+              aria-label="Close modal"
             >
               <X className="w-4 h-4" />
             </button>
@@ -70,34 +71,34 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ item, onClose }) =
         </div>
 
         {/* Modal Tabs */}
-        <div className="px-6 pt-3 flex items-center gap-2 border-b border-slate-100 bg-white/40">
+        <div className="px-3 sm:px-6 pt-2 sm:pt-3 flex items-center gap-1 sm:gap-2 border-b border-slate-100 bg-white/40 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveTab('evidence')}
-            className={`pb-2.5 px-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all ${
+            className={`pb-2 sm:pb-2.5 px-2.5 sm:px-3 text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 sm:gap-2 border-b-2 transition-all whitespace-nowrap cursor-pointer shrink-0 ${
               activeTab === 'evidence'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>Interactive Before / After Evidence</span>
+            <span>Interactive Evidence</span>
           </button>
 
           <button
             onClick={() => setActiveTab('trace')}
-            className={`pb-2.5 px-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all ${
+            className={`pb-2 sm:pb-2.5 px-2.5 sm:px-3 text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 sm:gap-2 border-b-2 transition-all whitespace-nowrap cursor-pointer shrink-0 ${
               activeTab === 'trace'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
-            <span>Observable Execution Trace</span>
+            <span>Execution Trace</span>
           </button>
 
           <button
             onClick={() => setActiveTab('metrics')}
-            className={`pb-2.5 px-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all ${
+            className={`pb-2 sm:pb-2.5 px-2.5 sm:px-3 text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 sm:gap-2 border-b-2 transition-all whitespace-nowrap cursor-pointer shrink-0 ${
               activeTab === 'metrics'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -109,7 +110,7 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ item, onClose }) =
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-4">
+        <div className="p-3.5 sm:p-6 overflow-y-auto space-y-3.5 sm:space-y-4">
           {activeTab === 'evidence' && (
             <div className="space-y-4">
               <div className="p-3.5 rounded-2xl bg-blue-50/80 border border-blue-100/90 text-slate-800 text-xs sm:text-sm">

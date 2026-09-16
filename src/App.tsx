@@ -107,7 +107,7 @@ export default function App() {
 
         {/* TAB 1: HOME DASHBOARD */}
         {currentTab === 'home' && (
-          <main className="flex-1 px-4 sm:px-8 pb-10 max-w-7xl w-full mx-auto space-y-4">
+          <main className="flex-1 px-3 sm:px-6 lg:px-8 pb-10 max-w-7xl w-full mx-auto space-y-3.5 sm:space-y-4">
             {/* Hero Section */}
             <HeroSection
               onOpenLiveEarth={() => {
@@ -129,7 +129,7 @@ export default function App() {
             />
 
             {/* Recent Analyses Section */}
-            <div className="px-2 sm:px-4 py-2">
+            <div className="px-1 sm:px-4 py-1 sm:py-2">
               <RecentAnalyses
                 items={analyses}
                 onSelectItem={(item) => setSelectedAnalysis(item)}

@@ -99,19 +99,20 @@ export const ChatView: React.FC<ChatViewProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-900/5 select-none relative">
       {/* Chat Top bar */}
-      <div className="px-6 py-3 border-b border-slate-200/70 bg-white/70 backdrop-blur-md flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="px-3 sm:px-6 py-2.5 sm:py-3 border-b border-slate-200/70 bg-white/70 backdrop-blur-md flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={onBackToHome}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs shrink-0 cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Dashboard</span>
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
           </button>
-          <div className="h-4 w-px bg-slate-200" />
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold text-slate-900">SatQuery AI 2.4 Chat</span>
+          <div className="h-4 w-px bg-slate-200 shrink-0" />
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="text-xs font-bold text-slate-900 truncate">SatQuery AI Chat</span>
           </div>
         </div>
 
@@ -126,15 +127,15 @@ export const ChatView: React.FC<ChatViewProps> = ({
               },
             ]);
           }}
-          className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+          className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors shrink-0 cursor-pointer"
         >
           Clear chat
         </button>
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 space-y-5">
-        <div className="max-w-3xl mx-auto space-y-5">
+      <div className="flex-1 overflow-y-auto px-2.5 sm:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5">
+        <div className="max-w-3xl mx-auto space-y-4 sm:space-y-5">
           {messages.map((msg) => {
             const isUser = msg.role === 'user';
             return (
