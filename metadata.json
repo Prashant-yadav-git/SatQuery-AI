@@ -1,0 +1,6 @@
+{
+  "name": "SatQuery AI",
+  "description": "AI-powered satellite imagery and geospatial intelligence platform with multimodal Earth observation analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
