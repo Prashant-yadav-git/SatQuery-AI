@@ -16,8 +16,8 @@ export const TopBar: React.FC<TopBarProps> = ({
   return (
     <header className="h-16 w-full px-3 sm:px-6 py-3 flex items-center justify-between gap-2 sm:gap-4 select-none z-20 shrink-0">
       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 max-w-2xl">
-        {/* Toggle Button: always accessible on mobile screens, or when desktop sidebar is collapsed */}
-        <div className={`flex items-center gap-2 shrink-0 ${isSidebarOpen ? 'lg:hidden' : 'flex'}`}>
+        {/* Mobile-only toggle button (on desktop, the sidebar's own top button controls it just like ChatGPT) */}
+        <div className="flex lg:hidden items-center gap-2 shrink-0">
           <button
             onClick={onToggleSidebar}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl glass-panel border border-white/80 text-slate-700 hover:text-slate-950 flex items-center justify-center shadow-xs transition-colors shrink-0 cursor-pointer active:scale-95"

@@ -8,12 +8,18 @@ import { RecentAnalyses } from './components/RecentAnalyses';
 import { PromoBanner } from './components/PromoBanner';
 import { AnalysisModal } from './components/AnalysisModal';
 import { ChatView } from './components/ChatView';
+import { SettingsView } from './components/SettingsView';
 import { createAnalysisFromQuery } from './data/mockData';
 import { AnalysisItem } from './types';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<string>('home');
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
   const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisItem | null>(null);
   const [activeQueryForChat, setActiveQueryForChat] = useState<string>('');
 
@@ -247,8 +253,13 @@ export default function App() {
           </main>
         )}
 
-        {/* OTHER SIDEBAR TABS (Explore, Saved, Reports, Settings) */}
-        {currentTab !== 'home' && currentTab !== 'new-chat' && currentTab !== 'my-analyses' && currentTab !== 'profile' && (
+        {/* TAB 5: SETTINGS & MODEL INTEGRATION */}
+        {currentTab === 'settings' && (
+          <SettingsView onBackToHome={() => setCurrentTab('home')} />
+        )}
+
+        {/* OTHER SIDEBAR TABS (Explore, Saved, Reports) */}
+        {currentTab !== 'home' && currentTab !== 'new-chat' && currentTab !== 'my-analyses' && currentTab !== 'profile' && currentTab !== 'settings' && (
           <div className="flex-1 p-8 max-w-4xl mx-auto flex flex-col items-center justify-center text-center space-y-4">
             <div className="p-6 rounded-[28px] glass-panel border border-white/80 shadow-md space-y-3 max-w-md w-full">
               <h2 className="text-xl font-bold text-slate-900 capitalize">
