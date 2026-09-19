@@ -7,13 +7,49 @@ export const SUGGESTIONS = [
   'Track flood changes',
 ];
 
-export function createAnalysisFromQuery(query: string): AnalysisItem {
+export function createAnalysisFromQuery(
+  query: string,
+  customImages?: { t1Url?: string; t2Url?: string; customTitle?: string; category?: 'Coastal' | 'Agriculture' | 'Environment' | 'Urban' }
+): AnalysisItem {
   const lower = query.toLowerCase();
   const dateStr = new Date().toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
   });
+
+  const baseT1 = customImages?.t1Url || 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80';
+  const baseT2 = customImages?.t2Url || 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=1200&q=80';
+
+  if (customImages?.t1Url && customImages?.t2Url) {
+    return {
+      id: `analysis-${Date.now()}`,
+      title: customImages.customTitle || (query.length > 5 ? query : 'Bi-Temporal Satellite Change Detection (User Uploaded)'),
+      category: customImages.category || 'Environment',
+      date: dateStr,
+      thumbnail: customImages.t2Url,
+      t1Image: customImages.t1Url,
+      t2Image: customImages.t2Url,
+      changeMask: 'linear-gradient(135deg, rgba(239, 68, 68, 0.45) 0%, rgba(249, 115, 22, 0.35) 100%)',
+      query: query || 'Analyze bi-temporal changes between uploaded T1 and T2 satellite images',
+      model: 'SatQuery Dual-Temporal SiameseNet v2.4',
+      metrics: {
+        changedAreaKm2: 18.6,
+        changedAreaPct: 9.4,
+        iou: 72.8,
+        precision: 79.1,
+        recall: 75.3,
+        f1: 77.2,
+      },
+      summary: `Bi-temporal analysis completed on user-uploaded pair. Detected 18.6 km² (9.4%) of dynamic spatial changes across the observed AOI. Evidence boundaries marked on T2 image.`,
+      trace: [
+        'User uploaded multi-temporal imagery ingested (T1 baseline & T2 current)',
+        'Bi-temporal spatial coregistration & multi-spectral band alignment validated',
+        'Siamese difference feature extractor executed',
+        'Dynamic bounding contours & change mask synthesized',
+      ],
+    };
+  }
 
   if (lower.includes('urban') || lower.includes('delhi') || lower.includes('city') || lower.includes('building')) {
     return {

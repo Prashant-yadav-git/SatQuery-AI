@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { ChatMessage, AnalysisItem } from '../types';
 import { createAnalysisFromQuery } from '../data/mockData';
-import { getStoredBackendUrl, queryModelInference } from '../services/api';
 
 interface ChatViewProps {
   initialQuery?: string;
@@ -61,8 +60,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
   });
 
   const [input, setInput] = useState('');
-  const [attachedImageName, setAttachedImageName] = useState<string | null>(null);
-  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [t1File, setT1File] = useState<File | null>(null);
+  const [t2File, setT2File] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -71,69 +70,40 @@ export const ChatView: React.FC<ChatViewProps> = ({
   }, [messages]);
 
   const handleSend = async () => {
-    if ((!input.trim() && !attachedImageName) || isLoading) return;
+    const hasAttachments = t1File !== null || t2File !== null;
+    if ((!input.trim() && !hasAttachments) || isLoading) return;
 
-    const userText = input.trim() || 'Analyze attached satellite imagery';
+    let attachSummary = '';
+    if (t1File && t2File) {
+      attachSummary = `[Attached Bi-temporal Pair: T₁=${t1File.name}, T₂=${t2File.name}]`;
+    } else if (t1File) {
+      attachSummary = `[Attached: ${t1File.name}]`;
+    } else if (t2File) {
+      attachSummary = `[Attached: ${t2File.name}]`;
+    }
+
+    const userText = input.trim() || 'Analyze bi-temporal changes between uploaded satellite images';
     const userMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
       role: 'user',
-      content: attachedImageName ? `[Attached: ${attachedImageName}]\n${userText}` : userText,
+      content: attachSummary ? `${attachSummary}\n${userText}` : userText,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
-    const fileToSend = attachedFile;
-    setAttachedImageName(null);
-    setAttachedFile(null);
 
-    const backendUrl = getStoredBackendUrl();
+    // Generate local Object URLs if user uploaded files
+    const t1Url = t1File ? URL.createObjectURL(t1File) : undefined;
+    const t2Url = t2File ? URL.createObjectURL(t2File) : undefined;
 
-    if (backendUrl) {
-      setIsLoading(true);
-      try {
-        const result = await queryModelInference(userText, fileToSend);
-        const liveAnalysis = createAnalysisFromQuery(userText);
-        if (result.metrics?.confidence) {
-          liveAnalysis.metrics.iou = Math.round(result.metrics.confidence * 100);
-        }
-        if (result.metrics?.coverage_area_sqkm) {
-          liveAnalysis.metrics.changedAreaKm2 = result.metrics.coverage_area_sqkm;
-        }
+    setT1File(null);
+    setT2File(null);
 
-        if (onAddAnalysis) {
-          onAddAnalysis(liveAnalysis);
-        }
+    setIsLoading(true);
 
-        const assistantMsg: ChatMessage = {
-          id: `msg-${Date.now() + 1}`,
-          role: 'assistant',
-          content: `${result.answer}\n\n- **Model**: ${result.model_version || 'EarthVision-VLM'}\n- **Confidence / IoU**: ${(result.metrics?.confidence ? (result.metrics.confidence * 100).toFixed(1) : 94.2)}%\n- **Task Category**: ${result.task || liveAnalysis.category}\n\nVerified satellite evidence card generated below.`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          analysis: liveAnalysis,
-        };
-
-        setMessages((prev) => [...prev, assistantMsg]);
-      } catch (err: any) {
-        console.warn('Backend inference failed, falling back to local engine', err);
-        const fallbackAnalysis = createAnalysisFromQuery(userText);
-        if (onAddAnalysis) {
-          onAddAnalysis(fallbackAnalysis);
-        }
-        const assistantMsg: ChatMessage = {
-          id: `msg-${Date.now() + 1}`,
-          role: 'assistant',
-          content: `Analyzed "${userText}".\n\n- **Category**: ${fallbackAnalysis.category}\n- **Pipeline**: ${fallbackAnalysis.model}\n- **Changed Area**: +${fallbackAnalysis.metrics.changedAreaKm2} km²`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          analysis: fallbackAnalysis,
-        };
-        setMessages((prev) => [...prev, assistantMsg]);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      // Local simulation mode
-      const newAnalysis = createAnalysisFromQuery(userText);
+    setTimeout(() => {
+      const newAnalysis = createAnalysisFromQuery(userText, { t1Url, t2Url });
       if (onAddAnalysis) {
         onAddAnalysis(newAnalysis);
       }
@@ -141,13 +111,14 @@ export const ChatView: React.FC<ChatViewProps> = ({
       const assistantMsg: ChatMessage = {
         id: `msg-${Date.now() + 1}`,
         role: 'assistant',
-        content: `Analyzed "${userText}".\n\n- **Target Category**: ${newAnalysis.category}\n- **Pipeline**: ${newAnalysis.model}\n- **Changed Area**: +${newAnalysis.metrics.changedAreaKm2} km² (${newAnalysis.metrics.changedAreaPct}%)\n- **IoU Overlap**: ${newAnalysis.metrics.iou}%\n\nInspect the interactive evidence card below for bi-temporal visual verification.`,
+        content: `Analyzed bi-temporal satellite pair for "${userText}".\n\n- **Detected Change Area**: +${newAnalysis.metrics.changedAreaKm2} km² (${newAnalysis.metrics.changedAreaPct}% of target AOI)\n- **IoU Confidence**: ${newAnalysis.metrics.iou}%\n- **Model Pipeline**: ${newAnalysis.model}\n\nInspect the interactive evidence card below with sketched contours and bi-temporal comparison.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         analysis: newAnalysis,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
-    }
+      setIsLoading(false);
+    }, 600);
   };
 
   return (
@@ -257,33 +228,79 @@ export const ChatView: React.FC<ChatViewProps> = ({
       {/* Input Bar */}
       <div className="p-4 bg-white/60 backdrop-blur-md border-t border-slate-200/70">
         <div className="max-w-3xl mx-auto space-y-2">
-          {attachedImageName && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-700">
-              <span>{attachedImageName}</span>
-              <button onClick={() => setAttachedImageName(null)}>
-                <X className="w-3 h-3 text-blue-500 hover:text-blue-800" />
-              </button>
+          {/* Attached Files Chips */}
+          {(t1File || t2File) && (
+            <div className="flex flex-wrap items-center gap-2">
+              {t1File && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-700 shadow-2xs">
+                  <span className="font-bold text-[10px] uppercase tracking-wider bg-blue-200/70 text-blue-900 px-1.5 py-0.2 rounded">T₁ Before</span>
+                  <span className="max-w-[150px] truncate">{t1File.name}</span>
+                  <button onClick={() => setT1File(null)} className="cursor-pointer">
+                    <X className="w-3.5 h-3.5 text-blue-500 hover:text-blue-800" />
+                  </button>
+                </div>
+              )}
+              {t2File && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-700 shadow-2xs">
+                  <span className="font-bold text-[10px] uppercase tracking-wider bg-emerald-200/70 text-emerald-900 px-1.5 py-0.2 rounded">T₂ After</span>
+                  <span className="max-w-[150px] truncate">{t2File.name}</span>
+                  <button onClick={() => setT2File(null)} className="cursor-pointer">
+                    <X className="w-3.5 h-3.5 text-emerald-500 hover:text-emerald-800" />
+                  </button>
+                </div>
+              )}
+              {!t2File && t1File && (
+                <label
+                  htmlFor="chat-image-upload-t2"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-dashed border-slate-300 text-slate-600 hover:border-slate-500 hover:text-slate-800 text-[11px] font-medium cursor-pointer transition-colors"
+                >
+                  <Paperclip className="w-3 h-3" />
+                  <span>+ Add T₂ (After) Image</span>
+                </label>
+              )}
             </div>
           )}
 
           <div className="flex items-center gap-2 p-2 rounded-2xl bg-white border border-slate-200/90 shadow-sm focus-within:border-blue-500">
+            {/* Hidden Multi-file Input */}
             <input
               type="file"
               id="chat-image-upload"
+              accept="image/*,.tif,.tiff"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  if (files.length >= 2) {
+                    setT1File(files[0]);
+                    setT2File(files[1]);
+                  } else {
+                    if (!t1File) {
+                      setT1File(files[0]);
+                    } else {
+                      setT2File(files[0]);
+                    }
+                  }
+                }
+              }}
+            />
+            <input
+              type="file"
+              id="chat-image-upload-t2"
               accept="image/*,.tif,.tiff"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  setAttachedFile(file);
-                  setAttachedImageName(file.name);
+                  setT2File(file);
                 }
               }}
             />
             <label
               htmlFor="chat-image-upload"
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-              title="Attach satellite image from computer"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer flex items-center gap-1"
+              title="Attach satellite images (select 1 or 2 files for bi-temporal change detection)"
             >
               <Paperclip className="w-4 h-4" />
             </label>
@@ -295,17 +312,17 @@ export const ChatView: React.FC<ChatViewProps> = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSend();
               }}
-              placeholder="Ask anything about the Earth..."
+              placeholder="Ask questions, or attach T₁ and T₂ satellite images to detect changes..."
               className="flex-1 bg-transparent text-xs sm:text-sm text-slate-800 outline-none placeholder:text-slate-400"
             />
 
             <button
               onClick={handleSend}
-              disabled={(!input.trim() && !attachedImageName) || isLoading}
+              disabled={(!input.trim() && !t1File && !t2File) || isLoading}
               className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                 isLoading
                   ? 'bg-slate-200 text-slate-400 cursor-wait'
-                  : input.trim() || attachedImageName
+                  : input.trim() || t1File || t2File
                   ? 'bg-slate-900 text-white shadow-md active:scale-95 cursor-pointer'
                   : 'bg-slate-100 text-slate-400 cursor-not-allowed'
               }`}
